@@ -21,7 +21,7 @@ REWARD_CLS = '.reward-star'
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-# Data JSON untuk akun (tidak diubah)
+# Data JSON untuk akun
 DATA_JSON = [
     {"username": "nhx4@sika3.com", "password": "asd1234", "server": 34},
     {"username": "nhx3@sika3.com", "password": "asd1234", "server": 34},
@@ -45,9 +45,8 @@ DATA_JSON = [
     {"username": "naruto123@gmail.com", "password": "naruto123", "server": 24}
 ]
 
-# GeckoDriver Path (diubah menjadi local path ./drivers/geckodriver)
+# GeckoDriver Path (pastikan path ini sesuai dengan lingkungan Anda, misalnya di GitHub Actions)
 GECKODRIVER_PATH = "./drivers/geckodriver"
-
 
 def send_telegram_message(message, parse_mode="HTML"):
     """Mengirimkan pesan ke Telegram Bot"""
@@ -94,7 +93,7 @@ def login_event(driver, username, password):
         return True
     else:
         print(f"❌ Login gagal untuk {username}")
-        send_telegram_message(f"❌ Login gagal untuk <b>{username}</b>", parse_mode="HTML")
+        send_telegram_message(f"❌ <b>Login gagal</b> untuk akun <b>{username}</b> pada {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         return False
 
 
@@ -109,12 +108,12 @@ def claim_item(driver, username, server):
         if reward:
             reward.click()  # Klik untuk klaim
             driver.find_element(By.XPATH, "//button[text()='OKE']").click()  # Klik OKE di popup
-            item_claimed = "Item bintang berhasil diklaim!"
-            send_telegram_message(f"🎉 Klaim sukses untuk <b>{username}</b> di server <b>{server}</b>.\n{item_claimed}\nWaktu: <i>{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</i>", parse_mode="HTML")
+            item_claimed = "Item Bintang"  # Contoh item, bisa disesuaikan jika ada detail lebih lanjut
+            send_telegram_message(f"🎉 <b>Klaim sukses</b> untuk akun <b>{username}</b> di server <b>{server}</b> pada {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}.\n\nItem yang diklaim: <b>{item_claimed}</b>")
         else:
-            send_telegram_message(f"⚠️ Tidak ada item bintang untuk <b>{username}</b> di server <b>{server}</b>.\nWaktu: <i>{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</i>", parse_mode="HTML")
+            send_telegram_message(f"⚠️ Tidak ada item yang bisa diklaim untuk akun <b>{username}</b> di server <b>{server}</b> pada {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     except Exception as e:
-        send_telegram_message(f"❌ Klaim gagal untuk <b>{username}</b> di server <b>{server}</b>. Error: <i>{str(e)}</i>\nWaktu: <i>{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</i>", parse_mode="HTML")
+        send_telegram_message(f"❌ <b>Klaim gagal</b> untuk akun <b>{username}</b> di server <b>{server}</b> pada {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}.\n\nError: {str(e)}")
 
 
 def user_claim(account):
@@ -125,22 +124,21 @@ def user_claim(account):
 
     driver = setup_driver()
     try:
-        send_telegram_message(f"🔄 Memulai klaim untuk <b>{username}</b> di server <b>{server}</b>...\nWaktu: <i>{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</i>", parse_mode="HTML")
+        send_telegram_message(f"🔄 Memulai klaim untuk akun <b>{username}</b> di server <b>{server}</b> pada {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}...")
         if login_event(driver, username, password):
             claim_item(driver, username, server)
     except Exception as e:
-        send_telegram_message(f"❌ Terjadi kesalahan: <i>{e}</i>\nWaktu: <i>{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</i>", parse_mode="HTML")
+        send_telegram_message(f"❌ Terjadi kesalahan: {e}")
     finally:
         driver.quit()
 
 
 def main():
     """Jalankan klaim hadiah untuk semua akun"""
-    send_telegram_message("🚀 Memulai proses klaim harian...", parse_mode="HTML")
+    send_telegram_message("🚀 <b>Memulai proses klaim harian</b> pada {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}...")
     for account in DATA_JSON:
         user_claim(account)
-    send_telegram_message("✅ Semua klaim telah selesai!", parse_mode="HTML")
-
+    send_telegram_message("✅ <b>Semua klaim telah selesai!</b> pada {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 if __name__ == "__main__":
     main()
