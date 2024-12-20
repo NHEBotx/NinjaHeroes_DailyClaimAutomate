@@ -1,38 +1,50 @@
-name: KageHero Claim Bot
+name: NinjaHeroes Daily Claim Automate
 
 on:
+  push:
+    branches:
+      - main
   schedule:
-    - cron: "0 */6 * * *"  # Menjalankan setiap 6 jam
-  workflow_dispatch:  # Menambahkan trigger manual jika ingin menjalankan kapan saja
-
+    - cron: "0 0 * * *"  # Menjadwalkan untuk menjalankan setiap hari pada tengah malam UTC
 
 jobs:
-  claim-items:
+  claim_job:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      # Checkout kode sumber dari repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
+      # Set up Python environment
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'  # Menyesuaikan dengan versi Python yang diinginkan
+          python-version: '3.12'
 
+      # Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Setup Geckodriver
+      # Install Firefox dan GeckoDriver
+      - name: Install Firefox and GeckoDriver
         run: |
           sudo apt-get update
           sudo apt-get install -y firefox
-          chmod +x ./drivers/geckodriver
+          wget https://github.com/mozilla/geckodriver/releases/download/v0.32.0/geckodriver-v0.32.0-linux64.tar.gz
+          tar -xvzf geckodriver-v0.32.0-linux64.tar.gz
+          sudo mv geckodriver /usr/local/bin/
 
+      # Set environment variables for Telegram Bot
+      - name: Set Telegram Bot Token and Chat ID
+        run: echo "TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}" >> $GITHUB_ENV
+          
+      - name: Set Telegram Chat ID
+        run: echo "TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}" >> $GITHUB_ENV
+
+      # Run Python script to perform the claim
       - name: Run claim script
         run: |
-          python ./scripts/claim_script.py
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          python sc.py  # Ganti dengan nama file skrip Python Anda
